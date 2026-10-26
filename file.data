@@ -1,0 +1,7 @@
+SETADD myset apple
+SETADD myset banana
+SETADD myset apple
+SET_AT myset apple
+SET_AT myset orange
+SETDEL myset apple
+SET_AT myset apple
