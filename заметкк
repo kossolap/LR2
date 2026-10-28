@@ -33,3 +33,10 @@ g++ -o task7 task7.cpp dlist.cpp
 ./task7 --cap 2 --query "SET 1 2 SET 2 3 SET 1 5 SET 4 5 SET 6 7 GET 4 SET 1 2 GET 3"
 ./task7 --cap 2 --query "SET 1 10 SET 1 20 GET 1"
 
+g++ -o task1 01_infix_to_postfix.cpp stack.cpp list.cpp && \
+g++ -o task2 02_set_hash.cpp list.cpp && \
+g++ -o task3 03_set_partition.cpp list.cpp && \
+g++ -o task4 04_array_subsets.cpp array.cpp && \
+g++ -o task5 05_tree_forks.cpp tree.cpp && \
+g++ -o task6 06_hash_table.cpp array.cpp && \
+g++ -o task7 07_lru_cache.cpp dlist.cpp
