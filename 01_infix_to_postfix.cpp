@@ -8,7 +8,6 @@ string peek(Stack* s) {
     return s->head->data;
 }
 
-// Приоритет операторов (по методичке: *, / выше +, -)
 int priority(const string& op) {
     if (op == "*" || op == "/") return 2;
     if (op == "+" || op == "-") return 1;
@@ -19,7 +18,6 @@ bool isOperator(const string& s) {
     return s == "+" || s == "-" || s == "*" || s == "/";
 }
 
-// Алгоритм преобразования инфиксной записи в постфиксную
 string infixToPostfix(const string& expr) {
     Stack* s = createStack(); 
     string result = "";

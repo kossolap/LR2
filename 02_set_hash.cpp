@@ -22,7 +22,6 @@ HashSet* createHashSet(int capacity) {
     return hs;
 }
 
-// Хеш-функция (метод деления)
 int hashFunc(const string& key, int capacity) {
     int hash = 0;
     for (char c : key) {

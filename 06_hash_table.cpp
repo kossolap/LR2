@@ -1,37 +1,33 @@
 #include <iostream>
 #include <string>
-#include "array.h" // Подключаем наш массив из ЛР1
+#include "array.h" 
 using namespace std;
 
-// Структура хеш-таблицы на основе нашего MyArray
 struct HashTable {
-    MyArray* table; // Используем массив из ЛР1 для хранения ключей (в виде строк)
+    MyArray* table; // (хранит ключи в виде строк)
     int capacity;
     int size;
 };
 
-// Создание таблицы (используем createArray из ЛР1)
 HashTable* createTable(int capacity) {
     HashTable* ht = new HashTable;
     ht->capacity = capacity;
     ht->size = 0;
-    ht->table = createArray(capacity); // Создаем массив из ЛР1
+    ht->table = createArray(capacity); 
     
-    // Заполняем массив пустыми строками (означает "ячейка свободна")
     for (int i = 0; i < capacity; i++) {
         pushBack(ht->table, "");
     }
     return ht;
 }
 
-// === МЕТОД СВЕРТКИ (из задания 6.2) ===
 int foldingHash(int key, bool showSteps = false) {
     int sum = 0;
     int tempKey = key;
     string steps = "";
     
     while (tempKey > 0) {
-        int part = tempKey % 1000;
+        int part = tempKey % 1000; 
         sum += part;
         if (showSteps) {
             if (!steps.empty()) steps = "+" + steps;
@@ -46,17 +42,16 @@ int foldingHash(int key, bool showSteps = false) {
     return sum;
 }
 
-// Вторая хеш-функция для двойного хеширования
 int secondHash(int key, int capacity) {
     return 1 + (key % (capacity - 1));
 }
 
-// === ЛИНЕЙНОЕ АПРОБИРОВАНИЕ ===
+
+//ЛИНЕЙНОЕ АПРОБИРОВАНИЕ
 void insertLinear(HashTable* ht, int key) {
     int index = foldingHash(key) % ht->capacity;
     int startIndex = index;
     
-    // Ищем свободную ячейку (пустую строку)
     while (getElement(ht->table, index) != "") {
         index = (index + 1) % ht->capacity;
         if (index == startIndex) {
@@ -65,13 +60,12 @@ void insertLinear(HashTable* ht, int key) {
         }
     }
     
-    // Вставляем ключ (превращаем число в строку)
     replaceElement(ht->table, index, to_string(key));
     ht->size++;
     cout << "  Вставлено (Линейное): " << key << " -> индекс " << index << endl;
 }
 
-// === ДВОЙНОЕ ХЕШИРОВАНИЕ ===
+//  ДВОЙНОЕ ХЕШИРОВАНИЕ 
 void insertDouble(HashTable* ht, int key) {
     int index = foldingHash(key) % ht->capacity;
     int step = secondHash(key, ht->capacity);
@@ -90,7 +84,6 @@ void insertDouble(HashTable* ht, int key) {
     cout << "  Вставлено (Двойное): " << key << " -> индекс " << index << endl;
 }
 
-// Вывод таблицы
 void printTable(HashTable* ht) {
     cout << "Содержимое таблицы (индекс: ключ):" << endl;
     for (int i = 0; i < ht->capacity; i++) {
@@ -121,7 +114,6 @@ int main() {
     cout << "Хеш-значение (сумма): " << hashVal << endl;
     cout << "Индекс в таблице (по модулю 10): " << (hashVal % 10) << endl;
     
-    // Создаем две таблицы на нашем массиве (размер 10)
     int capacity = 10;
     HashTable* htLinear = createTable(capacity);
     HashTable* htDouble = createTable(capacity);
@@ -131,7 +123,7 @@ int main() {
     insertLinear(htLinear, 20);
     insertLinear(htLinear, 30);
     insertLinear(htLinear, 40);
-    insertLinear(htLinear, 10); // Коллизия
+    insertLinear(htLinear, 10); 
     printTable(htLinear);
     
     cout << "\n--- Тест Двойного хеширования (вставляем 10, 20, 30, 40, 10) ---" << endl;
@@ -139,7 +131,7 @@ int main() {
     insertDouble(htDouble, 20);
     insertDouble(htDouble, 30);
     insertDouble(htDouble, 40);
-    insertDouble(htDouble, 10); // Коллизия
+    insertDouble(htDouble, 10); 
     printTable(htDouble);
     
     return 0;
