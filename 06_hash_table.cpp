@@ -4,7 +4,7 @@
 using namespace std;
 
 struct HashTable {
-    MyArray* table; // (хранит ключи в виде строк)
+    MyArray* table; 
     int capacity;
     int size;
 };
@@ -21,23 +21,12 @@ HashTable* createTable(int capacity) {
     return ht;
 }
 
-int foldingHash(int key, bool showSteps = false) {
+int foldingHash(int key) {
+    string s = to_string(key);
     int sum = 0;
-    int tempKey = key;
-    string steps = "";
-    
-    while (tempKey > 0) {
-        int part = tempKey % 1000; 
-        sum += part;
-        if (showSteps) {
-            if (!steps.empty()) steps = "+" + steps;
-            steps = to_string(part) + steps;
-        }
-        tempKey /= 1000;
-    }
-    
-    if (showSteps) {
-        cout << "Свертка: " << steps << " = " << sum << endl;
+    for (int i = s.length(); i > 0; i -= 3) {
+        int start = (i - 3 < 0) ? 0 : i - 3;
+        sum += stoi(s.substr(start, i - start));
     }
     return sum;
 }
@@ -46,27 +35,36 @@ int secondHash(int key, int capacity) {
     return 1 + (key % (capacity - 1));
 }
 
-
-//ЛИНЕЙНОЕ АПРОБИРОВАНИЕ
-void insertLinear(HashTable* ht, int key) {
+int findKey(HashTable* ht, int key) {
     int index = foldingHash(key) % ht->capacity;
     int startIndex = index;
+    int step = secondHash(key, ht->capacity);
     
     while (getElement(ht->table, index) != "") {
-        index = (index + 1) % ht->capacity;
-        if (index == startIndex) {
-            cout << "Таблица заполнена!" << endl;
-            return;
-        }
+        string entry = getElement(ht->table, index);
+        size_t pos = entry.find(':');
+        int existingKey = stoi(entry.substr(0, pos));
+        
+        if (existingKey == key) return index; 
+        
+        index = (index + step) % ht->capacity; 
+        if (index == startIndex) break; 
     }
-    
-    replaceElement(ht->table, index, to_string(key));
-    ht->size++;
-    cout << "  Вставлено (Линейное): " << key << " -> индекс " << index << endl;
+    return -1;
 }
 
-//  ДВОЙНОЕ ХЕШИРОВАНИЕ 
-void insertDouble(HashTable* ht, int key) {
+
+void insert(HashTable* ht, int key, string value) {
+    // 1. Проверяем, есть ли уже такой ключ
+    int existingIndex = findKey(ht, key);
+    
+    if (existingIndex != -1) {
+        replaceElement(ht->table, existingIndex, to_string(key) + ":" + value);
+        cout << "  Обновлено: ключ " << key << " -> новое значение " << value << endl;
+        return;
+    }
+    
+    // 2. Ключа нет. Ищем свободное место (разрешаем коллизии)
     int index = foldingHash(key) % ht->capacity;
     int step = secondHash(key, ht->capacity);
     int startIndex = index;
@@ -79,13 +77,13 @@ void insertDouble(HashTable* ht, int key) {
         }
     }
     
-    replaceElement(ht->table, index, to_string(key));
+    replaceElement(ht->table, index, to_string(key) + ":" + value);
     ht->size++;
-    cout << "  Вставлено (Двойное): " << key << " -> индекс " << index << endl;
+    cout << "  Вставлено: ключ " << key << " -> значение " << value << " (индекс " << index << ")" << endl;
 }
 
 void printTable(HashTable* ht) {
-    cout << "Содержимое таблицы (индекс: ключ):" << endl;
+    cout << "Содержимое таблицы (индекс: ключ:значение):" << endl;
     for (int i = 0; i < ht->capacity; i++) {
         string val = getElement(ht->table, i);
         if (val != "") {
@@ -110,29 +108,24 @@ int main() {
     cin >> userKey;
     
     cout << "\n--- Работа метода свертки для числа " << userKey << " ---" << endl;
-    int hashVal = foldingHash(userKey, true);
+    int hashVal = foldingHash(userKey);
     cout << "Хеш-значение (сумма): " << hashVal << endl;
     cout << "Индекс в таблице (по модулю 10): " << (hashVal % 10) << endl;
     
     int capacity = 10;
-    HashTable* htLinear = createTable(capacity);
-    HashTable* htDouble = createTable(capacity);
+    HashTable* ht = createTable(capacity);
     
-    cout << "\n--- Тест Линейного апробирования (вставляем 10, 20, 30, 40, 10) ---" << endl;
-    insertLinear(htLinear, 10);
-    insertLinear(htLinear, 20);
-    insertLinear(htLinear, 30);
-    insertLinear(htLinear, 40);
-    insertLinear(htLinear, 10); 
-    printTable(htLinear);
+    cout << "\n--- Тест 1: Вставляем ключ 10 со значением 'v1' ---" << endl;
+    insert(ht, 10, "v1");
+    printTable(ht);
     
-    cout << "\n--- Тест Двойного хеширования (вставляем 10, 20, 30, 40, 10) ---" << endl;
-    insertDouble(htDouble, 10);
-    insertDouble(htDouble, 20);
-    insertDouble(htDouble, 30);
-    insertDouble(htDouble, 40);
-    insertDouble(htDouble, 10); 
-    printTable(htDouble);
+    cout << "\n--- Тест 2: Вставляем ключ 10 со значением 'v2'  ---" << endl;
+    insert(ht, 10, "v2");
+    printTable(ht);
+    
+    cout << "\n--- Тест 3: Вставляем новый ключ 20 ---" << endl;
+    insert(ht, 20, "v3");
+    printTable(ht);
     
     return 0;
 }

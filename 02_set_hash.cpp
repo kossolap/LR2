@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <map>
+#include <sstream>
+#include <fstream>
 #include "list.h"
 using namespace std;
 
@@ -17,7 +17,7 @@ HashSet* createHashSet(int capacity) {
     hs->capacity = capacity;
     hs->buckets = new MyList*[capacity];
     for (int i = 0; i < capacity; i++) {
-        hs->buckets[i] = createList(); 
+        hs->buckets[i] = createList();
     }
     return hs;
 }
@@ -32,20 +32,36 @@ int hashFunc(const string& key, int capacity) {
 }
 
 void setAdd(HashSet* hs, const string& val) {
-    int idx = hashFunc(val, hs->capacity); 
+    int idx = hashFunc(val, hs->capacity);
     if (findNode(hs->buckets[idx], val) == nullptr) {
-        pushBack(hs->buckets[idx], val); 
+        pushBack(hs->buckets[idx], val);
+        cout << "Добавлено: " << val << endl; 
+    } else {
+        cout << "Элемент '" << val << "' уже есть (дубликат не добавлен)" << endl;
     }
 }
 
 void setDel(HashSet* hs, const string& val) {
     int idx = hashFunc(val, hs->capacity);
-    deleteByValue(hs->buckets[idx], val); 
+    deleteByValue(hs->buckets[idx], val);
+    cout << "Удалено: " << val << endl;
 }
 
 bool setAt(HashSet* hs, const string& val) {
     int idx = hashFunc(val, hs->capacity);
-    return findNode(hs->buckets[idx], val) != nullptr; 
+    return findNode(hs->buckets[idx], val) != nullptr;
+}
+
+void setPrint(HashSet* hs) {
+    cout << "Содержимое множества: [ ";
+    for (int i = 0; i < hs->capacity; i++) {
+        Node* curr = hs->buckets[i]->head;
+        while (curr != nullptr) {
+            cout << curr->data << " ";
+            curr = curr->next;
+        }
+    }
+    cout << "]" << endl;
 }
 
 map<string, HashSet*> sets;
@@ -65,6 +81,7 @@ bool executeCmd(const string& query) {
     string cmd = tokens[0];
     string name = tokens[1];
     string val = tokens[2];
+    
     if (cmd == "SETADD" && sets.find(name) == sets.end()) {
         sets[name] = createHashSet(1000);
     }
@@ -85,6 +102,9 @@ bool executeCmd(const string& query) {
         if (setAt(hs, val)) cout << "TRUE" << endl;
         else cout << "FALSE" << endl;
     } 
+    else if (cmd == "SETPRINT") {
+        setPrint(hs);
+    }
     else {
         return false;
     }
@@ -102,6 +122,15 @@ bool loadFromFile(const string& filename) {
     return true;
 }
 
+void saveToFile(const string& filename, const string& query) {
+    if (filename.empty()) return;
+    if (query.find("SETADD") != string::npos || query.find("SETDEL") != string::npos) {
+        ofstream out(filename, ios::app);
+        out << query << endl;
+        out.close();
+    }
+}
+
 int main(int argc, char* argv[]) {
     string filename = "";
     string query = "";
@@ -113,19 +142,11 @@ int main(int argc, char* argv[]) {
     }
 
     if (!filename.empty()) loadFromFile(filename);
-    if (!query.empty()) executeCmd(query);
+    if (!query.empty()) {
+        if (executeCmd(query)) {
+            saveToFile(filename, query);
+        }
+    }
 
     return 0;
 }
-
-/*cat > file.data << 'EOF'
-SETADD myset apple
-SETADD myset banana
-SETADD myset apple
-SET_AT myset apple
-SET_AT myset orange
-SETDEL myset apple
-SET_AT myset apple
-EOF
-./task2 --file file.data
-./task2 --file file.data --query "SET_AT myset banana"*/

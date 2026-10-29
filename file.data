@@ -1,7 +1,4 @@
 SETADD myset apple
-SETADD myset banana
 SETADD myset apple
-SET_AT myset apple
-SET_AT myset orange
+SETADD myset banana
 SETDEL myset apple
-SET_AT myset apple

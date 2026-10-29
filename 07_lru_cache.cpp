@@ -2,16 +2,16 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include "dlist.h" // (хранит порядок)
-#include "list.h"  // (для хеш-таблицы)
+#include "dlist.h" 
+#include "list.h"  
 
 using namespace std;
 
 
 struct HashEntry {
     int key;
-    DNode* listNode; // Указатель на узел в двусвязном списке
-    HashEntry* next; // Для разрешения коллизий методом цепочек
+    DNode* listNode; 
+    HashEntry* next; 
 };
 
 struct LRUHashTable {
@@ -30,10 +30,9 @@ LRUHashTable* createHashTable(int capacity) {
 }
 
 int hashFunc(int key, int capacity) {
-    return key % capacity; // Простая хеш-функция
+    return key % capacity; 
 }
 
-// Поиск узла списка по ключу через хеш-таблицу (O(1))
 DNode* hashFind(LRUHashTable* ht, int key) {
     int idx = hashFunc(key, ht->capacity);
     HashEntry* curr = ht->buckets[idx];
@@ -44,14 +43,12 @@ DNode* hashFind(LRUHashTable* ht, int key) {
     return nullptr;
 }
 
-// Добавление связи "ключ -> узел списка" в хеш-таблицу
 void hashInsert(LRUHashTable* ht, int key, DNode* listNode) {
     int idx = hashFunc(key, ht->capacity);
     HashEntry* newEntry = new HashEntry{key, listNode, ht->buckets[idx]};
     ht->buckets[idx] = newEntry;
 }
 
-// Удаление связи из хеш-таблицы
 void hashRemove(LRUHashTable* ht, int key) {
     int idx = hashFunc(key, ht->capacity);
     HashEntry* curr = ht->buckets[idx];
@@ -69,8 +66,8 @@ void hashRemove(LRUHashTable* ht, int key) {
 }
 
 struct LRUCache {
-    DoublyList* order;   //  для порядка
-    LRUHashTable* hash;  // для быстрого поиска
+    DoublyList* order;   
+    LRUHashTable* hash;  
     int capacity;
     int size;
 };
@@ -84,11 +81,10 @@ LRUCache* createLRUCache(int capacity) {
     return cache;
 }
 
-// Вспомогательная функция: переместить узел в конец списка (сделать "самым новым")
 void moveToTail(LRUCache* cache, DNode* node) {
     if (node == cache->order->tail) return; 
     
-    // Вырезаем узел из текущего места
+    // Вырезаем узел
     if (node->prev != nullptr) node->prev->next = node->next;
     else cache->order->head = node->next;
     if (node->next != nullptr) node->next->prev = node->prev;
